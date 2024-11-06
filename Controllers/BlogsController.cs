@@ -1,4 +1,5 @@
-﻿using Bloggie.web.Models.ViewModels;
+﻿using Bloggie.web.Models.Domain;
+using Bloggie.web.Models.ViewModels;
 using Bloggie.web.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,15 +12,18 @@ public class BlogsController : Controller
     private readonly IBlogPostLikeRepository _blogPostLikeRepository;
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly IBlogPostCommentRepository _blogPostCommentRepository;
 
     public BlogsController(IBlogPostRepository blogPostRepository, IBlogPostLikeRepository blogPostLikeRepository,
     SignInManager<IdentityUser> signInManager,
-    UserManager<IdentityUser> userManager)
+    UserManager<IdentityUser> userManager,
+    IBlogPostCommentRepository blogPostCommentRepository)
     {
         this.blogPostRepository = blogPostRepository;
         _blogPostLikeRepository = blogPostLikeRepository;
         _signInManager = signInManager;
         _userManager = userManager;
+        _blogPostCommentRepository = blogPostCommentRepository;
     }
 
     [HttpGet]
@@ -65,4 +69,26 @@ public class BlogsController : Controller
 
         return View(blogDetailsViewModel);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> Index(BlogDetailsViewModel blogDetailsViewModel)
+    {
+        if (_signInManager.IsSignedIn(User))
+        {
+            var domainModel = new BlogPostComment
+            {
+                BlogPostId = blogDetailsViewModel.Id,
+                Description = blogDetailsViewModel.CommentDescription,
+                UserId = Guid.Parse(_userManager.GetUserId(User)),
+                DateAdded = DateTime.Now
+            };
+            await _blogPostCommentRepository.AddAsync(domainModel);
+            return RedirectToAction("Index", 
+                new {urlHandle = blogDetailsViewModel.UrlHandle});
+        }
+
+        return View();
+    }
+    
+    
 }
