@@ -48,7 +48,21 @@ public class BlogsController : Controller
                    liked = likeFromUser != null;
                }
             }
+            //get comments for this blog
+            var blogCommentsDomainModel = await _blogPostCommentRepository.GetCommentsByBlogAsync(blogPost.Id);
+
+            var blogCommentsForView = new List<BlogComment>();
             
+                foreach (var blogComment in blogCommentsDomainModel)
+                {
+                   blogCommentsForView.Add(new BlogComment
+                   {
+                          Description = blogComment.Description,
+                          DateAdded = blogComment.DateAdded,
+                          UserName = (await _userManager.FindByIdAsync(blogComment.UserId.ToString())).UserName
+                   });
+                }
+                
              blogDetailsViewModel = new BlogDetailsViewModel
             {
                 Id = blogPost.Id,
@@ -63,7 +77,9 @@ public class BlogsController : Controller
                 Visible = blogPost.Visible,
                 Tags = blogPost.Tags,
                 TotalLikes = totalLikes,
-                Liked = liked
+                Liked = liked,
+                Comments = blogCommentsForView
+                
             };
         }
 
@@ -83,12 +99,13 @@ public class BlogsController : Controller
                 DateAdded = DateTime.Now
             };
             await _blogPostCommentRepository.AddAsync(domainModel);
-            return RedirectToAction("Index", 
+            return RedirectToAction("Index", "Blogs",
                 new {urlHandle = blogDetailsViewModel.UrlHandle});
         }
 
         return View();
     }
+    
     
     
 }

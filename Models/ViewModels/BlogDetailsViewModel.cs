@@ -31,4 +31,8 @@ public class BlogDetailsViewModel
     public bool Liked { get; set; }
     
     public string CommentDescription { get; set; }
+    
+    public IEnumerable<BlogComment> Comments { get; set; }
+    
+    
 }
