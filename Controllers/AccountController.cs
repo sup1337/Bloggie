@@ -14,6 +14,7 @@ public class AccountController : Controller
         this.userManager = userManager;
         this.signInManager = signInManager;
     }
+
     [HttpGet]
     public IActionResult Register()
     {
@@ -23,28 +24,32 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
     {
-        var identityUser = new IdentityUser
+        //kell hozza a required attributum a RegisterViewModel-ben
+        if (ModelState.IsValid)
         {
-            UserName = registerViewModel.Username,
-            Email = registerViewModel.Email
-        };
-       var identityResult = await userManager.CreateAsync(identityUser, registerViewModel.Password);
-       if (identityResult.Succeeded)
-       {
-           //assign user to role
-             var roleIdentityResult = await userManager.AddToRoleAsync(identityUser, "User");
+            var identityUser = new IdentityUser
+            {
+                UserName = registerViewModel.Username,
+                Email = registerViewModel.Email
+            };
+            var identityResult = await userManager.CreateAsync(identityUser, registerViewModel.Password);
+            if (identityResult.Succeeded)
+            {
+                //assign user to role
+                var roleIdentityResult = await userManager.AddToRoleAsync(identityUser, "User");
 
-             if (roleIdentityResult.Succeeded)
-             {
-                 //show success message
+                if (roleIdentityResult.Succeeded)
+                {
+                    //show success message
                     return RedirectToAction("Register");
-             }
-             
-             
-       }
-       return View();
+                }
+            }
+        }
+//show error message
+        return View();
     }
-    
+
+
     [HttpGet]
     public IActionResult Login(string ReturnUrl)
     {
@@ -58,26 +63,29 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Login(LoginViewModel loginViewModel)
     {
-        var signInResult = await signInManager.PasswordSignInAsync(loginViewModel.Username, loginViewModel.Password, false, false);
+        var signInResult =
+            await signInManager.PasswordSignInAsync(loginViewModel.Username, loginViewModel.Password, false, false);
         if (signInResult is { Succeeded: true })
         {
             if (!string.IsNullOrWhiteSpace(loginViewModel.ReturnUrl))
             {
                 return Redirect(loginViewModel.ReturnUrl);
             }
+
             return RedirectToAction("Index", "Home");
         }
+
         //show error message
         return View();
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Logout()
     {
         await signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");
     }
-    
+
     [HttpGet]
     public IActionResult AccessDenied()
     {
