@@ -63,8 +63,12 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Login(LoginViewModel loginViewModel)
     {
-        var signInResult =
-            await signInManager.PasswordSignInAsync(loginViewModel.Username, loginViewModel.Password, false, false);
+        //kell hozza a required attributum a LoginViewModel-ben
+        if (!ModelState.IsValid)
+        {
+            return View();
+        }
+        var signInResult = await signInManager.PasswordSignInAsync(loginViewModel.Username, loginViewModel.Password, false, false);
         if (signInResult is { Succeeded: true })
         {
             if (!string.IsNullOrWhiteSpace(loginViewModel.ReturnUrl))
