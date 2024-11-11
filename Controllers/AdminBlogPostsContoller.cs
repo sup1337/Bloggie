@@ -85,7 +85,7 @@ public class AdminBlogPostsController : Controller
     {
         //retrive reesult from repo
         var blogPost = await blogPostRepository.GetAsync(id);
-        var tagsDommainModel = await tagRepository.GetAllAsync();
+        var tagsDomainModel = await tagRepository.GetAllAsync();
 
         if (blogPost != null)
         {
@@ -102,7 +102,7 @@ public class AdminBlogPostsController : Controller
                 PublishedDate = blogPost.PublishedDate,
                 Author = blogPost.Author,
                 Visible = blogPost.Visible,
-                Tags = tagsDommainModel.Select(x => new SelectListItem
+                Tags = tagsDomainModel.Select(x => new SelectListItem
                 {
                     Text = x.Name, Value = x.Id.ToString()
                 }),

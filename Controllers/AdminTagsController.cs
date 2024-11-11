@@ -49,12 +49,17 @@ namespace Bloggie.web.Controllers;
         
         [HttpGet]
         [ActionName("List")]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> List(
+            string? searchQuery,
+            string? sortBy ,
+            string? sortDirection)
         {
+            ViewBag.SearchQuery = searchQuery;
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortDirection = sortDirection;
             // use dbContext to read the tags
             // ReSharper disable All
-            var tags = await tagRepository.GetAllAsync();
-            
+            var tags = await tagRepository.GetAllAsync(searchQuery, sortBy, sortDirection);
             return View(tags);
             // ReSharper restore All
         }

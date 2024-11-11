@@ -26,7 +26,9 @@ public class HomeController : Controller
         var blogPosts = await blogPostRepository.GetAllAsync();
 
         //getting all tags
-        var tags = await tagRepository.GetAllAsync();
+        // ReSharper disable All
+        var tags = await tagRepository.GetAllAsync(null);
+        // ReSharper restore All
         
         var model = new HomeViewModel
         {
