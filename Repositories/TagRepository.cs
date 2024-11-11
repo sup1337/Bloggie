@@ -33,10 +33,17 @@ public class TagRepository : ITagRepository
         return null;
     }
 
+    public async Task<int> CountAsync()
+    {
+       return await bloggieDbContext.Tags.CountAsync();
+    }
+
     public async Task<IEnumerable<Tag>> GetAllAsync(
         string? searchQuery, 
         string? sortBy, 
-        string? sortDirection)
+        string? sortDirection ,
+        int pageNumber = 1,
+        int pageSize = 100)
     {
         var query = bloggieDbContext.Tags.AsQueryable();
         
@@ -64,6 +71,9 @@ public class TagRepository : ITagRepository
         }
 
         //pagination
+        //skip 0 take 5 page 1 of 5 
+        var skip = (pageNumber - 1) * pageSize;
+        query = query.Skip(skip).Take(pageSize);
         
         
         return await query.ToListAsync();

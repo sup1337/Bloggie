@@ -4,6 +4,7 @@ using Bloggie.web.Models.ViewModels;
 using Bloggie.web.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bloggie.web.Controllers;
@@ -52,14 +53,32 @@ namespace Bloggie.web.Controllers;
         public async Task<IActionResult> List(
             string? searchQuery,
             string? sortBy ,
-            string? sortDirection)
+            string? sortDirection ,
+            int pageSize = 3 ,
+            int pageNumber = 1)
         {
+            var totalRecords = await tagRepository.CountAsync();
+            var totalPages = Math.Ceiling((decimal)totalRecords / pageSize);
+            if (pageNumber > totalPages)
+            {
+                pageNumber--;
+            }
+            if (pageNumber < 1)
+            {
+                pageNumber++;
+            }
+            
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalRecords = totalRecords;
             ViewBag.SearchQuery = searchQuery;
             ViewBag.SortBy = sortBy;
             ViewBag.SortDirection = sortDirection;
+            ViewBag.PageSize = pageSize;
+            ViewBag.PageNumber = pageNumber;
+            
             // use dbContext to read the tags
             // ReSharper disable All
-            var tags = await tagRepository.GetAllAsync(searchQuery, sortBy, sortDirection);
+            var tags = await tagRepository.GetAllAsync(searchQuery, sortBy, sortDirection, pageNumber, pageSize);
             return View(tags);
             // ReSharper restore All
         }
